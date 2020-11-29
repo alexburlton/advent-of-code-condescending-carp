@@ -1,14 +1,16 @@
 import math
 
+from typing import List
 
-def part_a(input_lines: list):
+
+def part_a(input_lines: List[str]) -> None:
     fuel = 0
     for line in input_lines:
         fuel += calculate_fuel_for_mass(int(line))
     print(fuel)
 
 
-def part_b(input_lines: list):
+def part_b(input_lines: List[str]) -> None:
     fuel = 0
     for line in input_lines:
         fuel += calculate_adjusted_fuel_for_mass(int(line))
@@ -28,8 +30,9 @@ def calculate_adjusted_fuel_for_mass(mass: int) -> int:
     return total_fuel
 
 
-f = open("../resources/day_1_2019.txt", "r")
-inputLines = f.readlines()
+if __name__ == '__main__':
+    f = open("day_1_2019.txt", "r")
+    inputLines = f.readlines()
 
-part_a(inputLines)
-part_b(inputLines)
+    part_a(inputLines)
+    part_b(inputLines)
