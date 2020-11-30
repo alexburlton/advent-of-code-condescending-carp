@@ -3,17 +3,15 @@ import math
 from typing import List
 
 
-def part_a(input_lines: List[str]) -> None:
-    fuel = 0
-    for line in input_lines:
-        fuel += calculate_fuel_for_mass(int(line))
+def part_a(input_lines: List[int]) -> None:
+    fuels = map(calculate_fuel_for_mass, input_lines)
+    fuel = sum(fuels)
     print(fuel)
 
 
-def part_b(input_lines: List[str]) -> None:
-    fuel = 0
-    for line in input_lines:
-        fuel += calculate_adjusted_fuel_for_mass(int(line))
+def part_b(input_lines: List[int]) -> None:
+    fuels = map(calculate_adjusted_fuel_for_mass, input_lines)
+    fuel = sum(fuels)
     print(fuel)
 
 
@@ -32,7 +30,7 @@ def calculate_adjusted_fuel_for_mass(mass: int) -> int:
 
 if __name__ == '__main__':
     f = open("day_1_2019.txt", "r")
-    inputLines = f.readlines()
+    inputLines = list(map(int, f.readlines()))
 
     part_a(inputLines)
     part_b(inputLines)
