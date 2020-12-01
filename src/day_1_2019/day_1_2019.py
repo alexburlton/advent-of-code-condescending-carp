@@ -2,6 +2,8 @@ import math
 
 from typing import List
 
+from utils import read_integer_list
+
 
 def part_a(input_lines: List[int]) -> None:
     fuels = map(calculate_fuel_for_mass, input_lines)
@@ -29,8 +31,7 @@ def calculate_adjusted_fuel_for_mass(mass: int) -> int:
 
 
 if __name__ == '__main__':
-    f = open("day_1_2019.txt", "r")
-    inputLines = list(map(int, f.readlines()))
+    inputLines = read_integer_list("day_1_2019.txt")
 
     part_a(inputLines)
     part_b(inputLines)
