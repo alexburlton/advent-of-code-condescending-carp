@@ -7,15 +7,6 @@ example_input = read_text_list('day_3_example.txt')
 
 class TestDay3(unittest.TestCase):
 
-    def test_convert_line_to_repeating_array(self):
-        array = convert_to_array('..##.')
-        self.assertListEqual(array, ['.', '.', '#', '#', '.'])
-
-    def test_convert_to_grid(self):
-        result = convert_to_grid(example_input)
-        self.assertListEqual(result[0], ['.', '.', '#', '#', '.', '.', '.', '.', '.', '.', '.'])
-        self.assertListEqual(result[10], ['.', '#', '.', '.', '#', '.', '.', '.', '#', '.', '#'])
-
     def test_count_trees_for_slope(self):
         self.assertEqual(count_trees_for_slope(example_input, 1, 1), 2)
         self.assertEqual(count_trees_for_slope(example_input, 3, 1), 7)
