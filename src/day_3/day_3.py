@@ -14,8 +14,9 @@ def part_b(input_lines: List[str]):
 
 
 def get_tree_product(input_lines: List[str]) -> int:
-    slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
-    return math.prod([count_trees_for_slope(input_lines, slope[0], slope[1]) for slope in slopes])
+    slopes: List[tuple[int, int]] = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
+    tree_counts: List[int] = [count_trees_for_slope(input_lines, slope[0], slope[1]) for slope in slopes]
+    return math.prod(tree_counts)
 
 
 def count_trees_for_slope(input_lines: List[str], x_slope: int, y_slope: int) -> int:
@@ -23,7 +24,7 @@ def count_trees_for_slope(input_lines: List[str], x_slope: int, y_slope: int) ->
     rows_visited: List[str] = [input_lines[ix] for ix in range(0, row_count, y_slope)]
 
     x_coords: iter = count(0, x_slope)
-    path = [get_item_at_location(row, next(x_coords)) for row in rows_visited]
+    path: List[str] = [get_item_at_location(row, next(x_coords)) for row in rows_visited]
     return count_where(is_tree, path)
 
 
