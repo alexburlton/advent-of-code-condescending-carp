@@ -1,6 +1,6 @@
 from typing import NamedTuple, List
 
-from utils import read_text_list
+from utils import read_text_list, count_where
 
 
 class PasswordAndRule(NamedTuple):
@@ -41,12 +41,12 @@ def parse_lines(password_list: List[str]) -> List[PasswordAndRule]:
 
 def count_valid(password_list: List[str]) -> int:
     parsed_lines: List[PasswordAndRule] = parse_lines(password_list)
-    return len(list(filter(is_valid, parsed_lines)))
+    return count_where(is_valid, parsed_lines)
 
 
 def count_valid_new_way(password_list: List[str]) -> int:
     parsed_lines: List[PasswordAndRule] = parse_lines(password_list)
-    return len(list(filter(is_valid_new_way, parsed_lines)))
+    return count_where(is_valid_new_way, parsed_lines)
 
 
 def part_a(input_lines: List[str]) -> None:
