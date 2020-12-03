@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, TypeVar, Callable, Iterable
 
 
 def read_integer_list(file_name: str) -> List[int]:
@@ -9,3 +9,10 @@ def read_integer_list(file_name: str) -> List[int]:
 def read_text_list(file_name: str) -> List[str]:
     f = open(file_name, "r")
     return list(f.read().splitlines())
+
+
+T = TypeVar('T')
+
+
+def count_where(fn: Callable[[T], bool], iterable: Iterable[T]) -> int:
+    return len(list(filter(fn, iterable)))

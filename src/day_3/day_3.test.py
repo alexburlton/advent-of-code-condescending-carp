@@ -7,6 +7,17 @@ example_input = read_text_list('day_3_example.txt')
 
 class TestDay3(unittest.TestCase):
 
+    def test_is_tree(self):
+        self.assertTrue(is_tree('#'))
+        self.assertFalse(is_tree('.'))
+        self.assertFalse(is_tree(' '))
+
+    def test_get_item_at_location(self):
+        self.assertEqual(get_item_at_location('#..#', 0), '#')
+        self.assertEqual(get_item_at_location('#..#', 1), '.')
+        self.assertEqual(get_item_at_location('#..#', 5), '.')
+        self.assertEqual(get_item_at_location('#..#', 405), '.')
+
     def test_count_trees_for_slope(self):
         self.assertEqual(count_trees_for_slope(example_input, 1, 1), 2)
         self.assertEqual(count_trees_for_slope(example_input, 3, 1), 7)
