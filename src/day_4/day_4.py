@@ -67,16 +67,16 @@ def is_strict_valid(data: PassportData) -> bool:
 
 
 def is_valid_height(hgt: str) -> bool:
-    split = re.split('(\D+)', hgt)
+    match = re.fullmatch('^([0-9]+)(cm|in)$', hgt)
 
-    if len(split) < 2:
+    if match is None:
         return False
 
-    value: str = split[0]
+    value: str = match.group(1)
     if not value.isnumeric():
         return False
 
-    units: str = split[1]
+    units: str = match.group(2)
     if units == 'cm':
         return 150 <= int(value) <= 193
     elif units == 'in':
