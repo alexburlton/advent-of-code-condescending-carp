@@ -60,7 +60,7 @@ class TestDay4(unittest.TestCase):
         self.assertFalse(is_strict_valid(make_valid_passport(hgt='58in')))
         self.assertFalse(is_strict_valid(make_valid_passport(hgt='77in')))
         self.assertFalse(is_strict_valid(make_valid_passport(hgt='cm')))
-        self.assertFalse(is_strict_valid(make_valid_passport(hgt='in')))
+        self.assertFalse(is_strict_valid(make_valid_passport(hgt='100')))
         self.assertFalse(is_strict_valid(make_valid_passport(hgt='100mm')))
 
     def test_is_strict_valid_hcl(self):
