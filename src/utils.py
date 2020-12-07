@@ -8,7 +8,9 @@ def read_integer_list(file_name: str) -> List[int]:
 
 def read_text_list(file_name: str) -> List[str]:
     f = open(file_name, "r")
-    return list(f.read().splitlines())
+    ret = list(f.read().splitlines())
+    f.close()
+    return ret
 
 
 T = TypeVar('T')
