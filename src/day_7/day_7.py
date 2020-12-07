@@ -48,16 +48,14 @@ def parse_bag_hierarchy(bag_fact_lines: List[str]) -> dict[str, List[BagAndCount
     return result
 
 
-def get_possible_containers(bag_hierarchy: dict[str, List[BagAndCount]], bag: str) -> set[str]:
-    direct_parents = {parent for (parent, children) in bag_hierarchy.items() if contains_bag(children, bag)}
-    if len(direct_parents) == 0:
-        return set()
-    return set.union(direct_parents, *[get_possible_containers(bag_hierarchy, parent) for parent in direct_parents])
-
-
 def contains_bag(children: List[BagAndCount], bag: str) -> bool:
     bag_attributes = [bag.attribute for bag in children]
     return bag in bag_attributes
+
+
+def get_possible_containers(bag_hierarchy: dict[str, List[BagAndCount]], bag: str) -> set[str]:
+    direct_parents = {parent for (parent, children) in bag_hierarchy.items() if contains_bag(children, bag)}
+    return set.union(direct_parents, *[get_possible_containers(bag_hierarchy, parent) for parent in direct_parents])
 
 
 def count_contents(bag_hierarchy: dict[str, List[BagAndCount]], bag: str) -> int:
