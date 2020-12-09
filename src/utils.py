@@ -1,9 +1,12 @@
+from itertools import tee
 from typing import List, TypeVar, Callable, Iterable
 
 
 def read_integer_list(file_name: str) -> List[int]:
     f = open(file_name, "r")
-    return list(map(int, f.readlines()))
+    values = list(map(int, f.readlines()))
+    f.close()
+    return values
 
 
 def read_text_list(file_name: str) -> List[str]:
@@ -11,6 +14,14 @@ def read_text_list(file_name: str) -> List[str]:
     ret = list(f.read().splitlines())
     f.close()
     return ret
+
+
+def windowed(iterable, size):
+    iters = tee(iterable, size)
+    for i in range(1, size):
+        for each in iters[i:]:
+            next(each, None)
+    return list(zip(*iters))
 
 
 T = TypeVar('T')

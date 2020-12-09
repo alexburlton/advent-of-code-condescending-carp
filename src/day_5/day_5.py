@@ -1,6 +1,6 @@
 from typing import List, Optional, Iterator
 
-from utils import read_text_list
+from utils import read_text_list, windowed
 
 
 def get_row_number(row_str: str) -> int:
@@ -32,10 +32,7 @@ def part_b(input_lines: List[str]) -> None:
 def find_missing_seat(seat_ids: List[int]) -> int:
     sorted_seats: List[int] = sorted(seat_ids)
 
-    high_seats = sorted_seats.copy()
-    high_seats.pop(0)
-
-    zipped_lists: Iterator[tuple[int, int]] = zip(sorted_seats, high_seats)
+    zipped_lists = windowed(sorted_seats, 2)
 
     missing_seats = [get_missing_seat(t[0], t[1]) for t in zipped_lists]
     return next(filter(lambda x: x is not None, missing_seats))
