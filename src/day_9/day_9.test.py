@@ -5,7 +5,7 @@ from src.day_9.day_9 import *
 
 class TestDay9(unittest.TestCase):
     def test_is_valid(self):
-        preamble = range(1, 26)
+        preamble = list(range(1, 26))
         self.assertTrue(is_valid(preamble, 26))
         self.assertTrue(is_valid(preamble, 49))
         self.assertFalse(is_valid(preamble, 100))
