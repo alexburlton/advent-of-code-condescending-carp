@@ -109,6 +109,65 @@ class TestDay12(unittest.TestCase):
         self.assertEqual(ship.current_direction, (0, -1))  # south
         self.assertEqual(ship.manhatten_distance(), 25)
 
+    def test_move_forward_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.waypoint_position = (4, 5)
+        ship.move_forward(5)
+        self.assertEqual(ship.current_position, (20, 25))
+
+    def test_move_north_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.move_north(5)
+        self.assertEqual(ship.current_position, (0, 0))  # should not have moved
+        self.assertEqual(ship.waypoint_position, (10, 6))
+
+    def test_move_south_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.move_south(5)
+        self.assertEqual(ship.current_position, (0, 0))  # should not have moved
+        self.assertEqual(ship.waypoint_position, (10, -4))
+
+    def test_move_east_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.move_east(5)
+        self.assertEqual(ship.current_position, (0, 0))  # should not have moved
+        self.assertEqual(ship.waypoint_position, (15, 1))
+
+    def test_move_west_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.move_west(5)
+        self.assertEqual(ship.current_position, (0, 0))  # should not have moved
+        self.assertEqual(ship.waypoint_position, (5, 1))
+
+    def test_turn_right_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.turn_right()
+        self.assertEqual(ship.waypoint_position, (1, -10))
+        ship.turn_right()
+        self.assertEqual(ship.waypoint_position, (-10, -1))
+        ship.turn_right()
+        self.assertEqual(ship.waypoint_position, (-1, 10))
+        ship.turn_right()
+        self.assertEqual(ship.waypoint_position, (10, 1))
+
+    def test_turn_left_with_waypoint(self):
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.turn_left()
+        self.assertEqual(ship.waypoint_position, (-1, 10))
+        ship.turn_left()
+        self.assertEqual(ship.waypoint_position, (-10, -1))
+        ship.turn_left()
+        self.assertEqual(ship.waypoint_position, (1, -10))
+        ship.turn_left()
+        self.assertEqual(ship.waypoint_position, (10, 1))
+
+    def test_process_instructions_with_waypoint(self):
+        instructions = ['F10', 'N3', 'F7', 'R90', 'F11']
+        ship: ShipAndWaypoint = ShipAndWaypoint()
+        ship.process_instructions(instructions)
+        self.assertEqual(ship.current_position, (214, -72))
+        self.assertEqual(ship.manhatten_distance(), 286)
+
 
 if __name__ == '__main__':
     unittest.main()
