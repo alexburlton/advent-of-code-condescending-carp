@@ -19,6 +19,13 @@ def read_text_list(file_name: str) -> List[str]:
     return ret
 
 
+def read_text_groups(file_name: str) -> List[str]:
+    f = open(file_name, "r")
+    ret = f.read().split("\n\n")
+    f.close()
+    return ret
+
+
 def get_adjacents(grid: Grid, coord: Point) -> List[str]:
     adjacent_coords = [add_points(coord, d) for d in get_unit_directions()]
     return [grid.get(adj, None) for adj in adjacent_coords if grid.get(adj, None) is not None]

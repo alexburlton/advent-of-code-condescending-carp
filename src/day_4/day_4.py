@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional
 
-from utils import count_where
+from utils import count_where, read_text_groups
 
 mandatory_fields: List[str] = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
 valid_eye_colors: List[str] = ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth']
@@ -31,10 +31,7 @@ def count_strict_valid_passports(file_name: str) -> int:
 
 
 def parse_passports_from_file(file_name: str) -> List[PassportData]:
-    f = open(file_name, "r")
-    raw_passports = f.read().split('\n\n')
-    f.close()
-
+    raw_passports = read_text_groups(file_name)
     return [parse_passport(data) for data in raw_passports]
 
 

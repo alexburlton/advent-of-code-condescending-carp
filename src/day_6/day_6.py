@@ -1,11 +1,6 @@
 from typing import List
 
-
-def read_customs_groups(file_name: str) -> List[str]:
-    f = open(file_name, "r")
-    customs_groups = f.read().split('\n\n')
-    f.close()
-    return customs_groups
+from utils import read_text_groups
 
 
 def count_unique_answers(customs_group: str) -> int:
@@ -20,13 +15,13 @@ def count_answers_given_by_all(customs_group: str) -> int:
 
 
 def part_a(file_name: str) -> int:
-    groups = read_customs_groups(file_name)
+    groups = read_text_groups(file_name)
     counts = [count_unique_answers(group) for group in groups]
     return sum(counts)
 
 
 def part_b(file_name: str) -> int:
-    groups = read_customs_groups(file_name)
+    groups = read_text_groups(file_name)
     counts = [count_answers_given_by_all(group) for group in groups]
     return sum(counts)
 

@@ -5,9 +5,6 @@ from src.day_6.day_6 import *
 
 class TestDay6(unittest.TestCase):
 
-    def test_read_customs_groups(self):
-        self.assertEqual(read_customs_groups('day_6_example.txt'), ['abc', 'a\nb\nc', 'ab\nac', 'a\na\na\na', 'b'])
-
     def test_count_unique_answers(self):
         self.assertEqual(count_unique_answers('abc'), 3)
         self.assertEqual(count_unique_answers('a\nb\nc'), 3)
