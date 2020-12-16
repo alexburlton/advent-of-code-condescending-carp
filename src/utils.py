@@ -67,3 +67,8 @@ T = TypeVar('T')
 
 def count_where(fn: Callable[[T], bool], iterable: Iterable[T]) -> int:
     return len(list(filter(fn, iterable)))
+
+
+def flatten(original: List[List[T]]) -> List[T]:
+    return [item for l in original for item in l]
+    
