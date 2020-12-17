@@ -1,16 +1,16 @@
 import math
 import re
 from dataclasses import dataclass
-from itertools import permutations
 from typing import List
 
-import numpy
-
-from utils import read_text_groups, flatten
+from utils import read_text_groups
 
 
 @dataclass
 class FieldRule:
+    range_one: range
+    range_two: range
+
     def __init__(self, range_one: range, range_two: range):
         self.range_one = range_one
         self.range_two = range_two
