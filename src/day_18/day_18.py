@@ -15,7 +15,7 @@ def resolve_complex_expression_b(expression: str) -> int:
 
 
 def resolve_addition(expression: str) -> str:
-    result = re.search(r'(\d+ \+ \d+).*$', expression)
+    result = re.search(r'(\d+ \+ \d+)', expression)
     if result is None:
         return expression
     matched = result.group(1)
@@ -37,7 +37,7 @@ def simplify_expression_fully(expression: str, resolve_simple: Callable[[str], i
 
 
 def simplify_expression(expression: str, resolve_simple: Callable[[str], int]) -> str:
-    result = re.match('^.*(\([0-9 *+]+\)).*$', expression)
+    result = re.match(r'^.*(\([0-9 *+]+\)).*$', expression)
     if result is None:
         return expression
     matched = result.group(1)
