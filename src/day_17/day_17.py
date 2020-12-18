@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from itertools import product
-from typing import List, TypeVar, Callable
+from typing import List, TypeVar, Callable, Set
 
 from utils import read_text_list, flatten, count_where
 
@@ -22,11 +22,11 @@ class Point3D(object):
     def __hash__(self):
         return hash((self.x, self.y, self.z))
 
-    def neighbours(self) -> List['Point3D']:
+    def neighbours(self) -> Set['Point3D']:
         unit_directions = [-1, 0, 1]
         result: List[tuple[int, int, int]] = list(product(unit_directions, repeat=3))
         result.remove((0, 0, 0))
-        return [self + Point3D(p[0], p[1], p[2]) for p in result]
+        return set(self + Point3D(p[0], p[1], p[2]) for p in result)
 
 
 @dataclass
@@ -48,11 +48,11 @@ class Point4D(object):
     def __hash__(self):
         return hash((self.x, self.y, self.z, self.w))
 
-    def neighbours(self) -> List['Point4D']:
+    def neighbours(self) -> Set['Point4D']:
         unit_directions = [-1, 0, 1]
         result: List[tuple[int, int, int, int]] = list(product(unit_directions, repeat=4))
         result.remove((0, 0, 0, 0))
-        return [self + Point4D(p[0], p[1], p[2], p[3]) for p in result]
+        return set(self + Point4D(p[0], p[1], p[2], p[3]) for p in result)
 
 
 Grid3D = dict[Point3D, bool]
@@ -84,7 +84,8 @@ def read_input_4d(file_name: str) -> Grid4D:
 
 
 def iterate_input(grid: Grid) -> Grid:
-    all_points_to_consider = set(flatten([point.neighbours() for point in grid.keys()]))
+    all_sets = [point.neighbours() for point in grid.keys()]
+    all_points_to_consider = set.union(*all_sets)
     new_grid: Grid = {}
     for point in all_points_to_consider:
         currently_active = is_active(point, grid)
