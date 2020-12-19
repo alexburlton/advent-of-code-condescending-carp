@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set
 
 from utils import read_text_groups, count_where
 
@@ -62,38 +62,48 @@ def read_rules_and_messages(file_name: str) -> (dict[int, Rule], List[str]):
     return rules, messages
 
 
-def count_valids(file_name: str) -> int:
-    rules, messages = read_rules_and_messages(file_name)
+def count_valids(rules: dict[int, Rule], messages: List[str]) -> int:
     return count_where(lambda message: is_valid(rules, message), messages)
 
 
 def is_valid(rules: dict[int, Rule], message: str) -> bool:
-    remaining, valid = is_valid_rec(rules, message, rules[0])
-    return valid and len(remaining) == 0
+    return len(message) in test_rule(message, rules, rules[0])
 
 
-def is_valid_rec(rules: dict[int, Rule], message: str, rule: Rule) -> (str, bool):
+def test_rule(message: str, rules: dict[int, Rule], rule: Rule) -> Set[int]:
     if len(message) == 0:
-        return '', False
+        return set()
 
     if isinstance(rule, SimpleRule):
-        return message[1:], message.startswith(rule.character)
+        return {1} if (message[0] == rule.character) else set()
     elif isinstance(rule, MultiRule):
-        rule_ids = rule.rule_ids
-        valid = True
-        remaining = message
-        for id in rule_ids:
-            remaining, was_valid = is_valid_rec(rules, remaining, rules[id])
-            valid = valid and was_valid
-        return remaining, valid
+        return test_multi_rule(message, rules, rule)
     elif isinstance(rule, ChoiceRule):
-        for child_rule in rule.rules:
-            remaining, valid = is_valid_rec(rules, message, child_rule)
-            if valid:
-                return remaining, valid
-        return '', False
+        overall_matches = set()
+        for choice in rule.rules:
+            overall_matches |= test_rule(message, rules, choice)
+        return overall_matches
+
+
+def test_multi_rule(message: str, rules: dict[int, Rule], rule: MultiRule) -> Set[int]:
+    child_rules = rule.rule_ids
+    matches = {0}
+    for rule_id in child_rules:
+        new_match = set()
+        for n in matches:
+            new_match |= {n + m for m in test_rule(message[n:], rules, rules[rule_id])}
+        matches = new_match
+    return matches
+
+
+def update_rules_for_part_b(rules: dict[int, Rule]):
+    rules[8] = parse_rule('42 | 42 8')
+    rules[11] = parse_rule('42 31 | 42 11 31')
 
 
 if __name__ == '__main__':
-    print(count_valids("day_19.txt"))
-    print(count_valids("day_19_b.txt"))
+    rules_and_messages = read_rules_and_messages('day_19.txt')
+    print(count_valids(rules_and_messages[0], rules_and_messages[1]))
+
+    update_rules_for_part_b(rules_and_messages[0])
+    print(count_valids(rules_and_messages[0], rules_and_messages[1]))

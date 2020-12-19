@@ -56,12 +56,33 @@ class TestDay19(unittest.TestCase):
         self.assertFalse(is_valid(rules, 'aaaabbb'))
 
     def test_count_valids(self):
-        self.assertEqual(count_valids("day_19_example.txt"), 2)
+        rules, messages = read_rules_and_messages("day_19_example.txt")
+        self.assertEqual(count_valids(rules, messages), 2)
 
-    def test_is_valid_adjusted_examples(self):
-        rules, _ = read_rules_and_messages("day_19_b_example.txt")
-        # self.assertTrue(is_valid(rules, 'bbabbbbaabaabba'))
+    def test_is_valid_example_b(self):
+        rules, messages = read_rules_and_messages("day_19_b_example.txt")
+        self.assertTrue(is_valid(rules, 'bbabbbbaabaabba'))
+        self.assertTrue(is_valid(rules, 'ababaaaaaabaaab'))
+        self.assertTrue(is_valid(rules, 'ababaaaaabbbaba'))
+        self.assertEqual(count_valids(rules, messages), 3)
+
+    def test_is_valid_example_b_adjusted(self):
+        rules, messages = read_rules_and_messages("day_19_b_example.txt")
+        update_rules_for_part_b(rules)
+
+        self.assertTrue(is_valid(rules, 'bbabbbbaabaabba'))
         self.assertTrue(is_valid(rules, 'babbbbaabbbbbabbbbbbaabaaabaaa'))
+        self.assertTrue(is_valid(rules, 'aaabbbbbbaaaabaababaabababbabaaabbababababaaa'))
+        self.assertTrue(is_valid(rules, 'bbbbbbbaaaabbbbaaabbabaaa'))
+        self.assertTrue(is_valid(rules, 'bbbababbbbaaaaaaaabbababaaababaabab'))
+        self.assertTrue(is_valid(rules, 'ababaaaaaabaaab'))
+        self.assertTrue(is_valid(rules, 'ababaaaaabbbaba'))
+        self.assertTrue(is_valid(rules, 'baabbaaaabbaaaababbaababb'))
+        self.assertTrue(is_valid(rules, 'abbbbabbbbaaaababbbbbbaaaababb'))
+        self.assertTrue(is_valid(rules, 'aaaaabbaabaaaaababaa'))
+        self.assertTrue(is_valid(rules, 'aaaabbaabbaaaaaaabbbabbbaaabbaabaaa'))
+        self.assertTrue(is_valid(rules, 'aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba'))
+        self.assertEqual(count_valids(rules, messages), 12)
 
 
 if __name__ == '__main__':
