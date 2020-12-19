@@ -18,12 +18,10 @@ class SimpleRule(Rule):
 
 @dataclass
 class ChoiceRule(Rule):
-    rule_one: Rule
-    rule_two: Rule
+    rules: List[Rule]
 
-    def __init__(self, rule_one: Rule, rule_two: Rule):
-        self.rule_one = rule_one
-        self.rule_two = rule_two
+    def __init__(self, rules: List[Rule]):
+        self.rules = rules
 
 
 @dataclass
@@ -51,7 +49,7 @@ def parse_rule(rule_str: str) -> Rule:
         return SimpleRule(character)
     elif '|' in rule_str:
         rules = [parse_rule(child) for child in rule_str.split(' | ')]
-        return ChoiceRule(rules[0], rules[1])
+        return ChoiceRule(rules)
     else:
         rule_ids = [int(child) for child in rule_str.split(' ')]
         return MultiRule(rule_ids)
@@ -75,6 +73,9 @@ def is_valid(rules: dict[int, Rule], message: str) -> bool:
 
 
 def is_valid_rec(rules: dict[int, Rule], message: str, rule: Rule) -> (str, bool):
+    if len(message) == 0:
+        return '', False
+
     if isinstance(rule, SimpleRule):
         return message[1:], message.startswith(rule.character)
     elif isinstance(rule, MultiRule):
@@ -86,12 +87,13 @@ def is_valid_rec(rules: dict[int, Rule], message: str, rule: Rule) -> (str, bool
             valid = valid and was_valid
         return remaining, valid
     elif isinstance(rule, ChoiceRule):
-        remaining_one, valid_one = is_valid_rec(rules, message, rule.rule_one)
-        if valid_one:
-            return remaining_one, valid_one
-        else:
-            return is_valid_rec(rules, message, rule.rule_two)
+        for child_rule in rule.rules:
+            remaining, valid = is_valid_rec(rules, message, child_rule)
+            if valid:
+                return remaining, valid
+        return '', False
 
 
 if __name__ == '__main__':
     print(count_valids("day_19.txt"))
+    print(count_valids("day_19_b.txt"))
