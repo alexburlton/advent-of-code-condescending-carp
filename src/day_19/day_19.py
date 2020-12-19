@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from utils import read_text_groups
+from utils import read_text_groups, count_where
 
 
 class Rule:
@@ -62,3 +62,36 @@ def read_rules_and_messages(file_name: str) -> (dict[int, Rule], List[str]):
     rules = parse_rules(groups[0].splitlines())
     messages = groups[1].splitlines()
     return rules, messages
+
+
+def count_valids(file_name: str) -> int:
+    rules, messages = read_rules_and_messages(file_name)
+    return count_where(lambda message: is_valid(rules, message), messages)
+
+
+def is_valid(rules: dict[int, Rule], message: str) -> bool:
+    remaining, valid = is_valid_rec(rules, message, rules[0])
+    return valid and len(remaining) == 0
+
+
+def is_valid_rec(rules: dict[int, Rule], message: str, rule: Rule) -> (str, bool):
+    if isinstance(rule, SimpleRule):
+        return message[1:], message.startswith(rule.character)
+    elif isinstance(rule, MultiRule):
+        rule_ids = rule.rule_ids
+        valid = True
+        remaining = message
+        for id in rule_ids:
+            remaining, was_valid = is_valid_rec(rules, remaining, rules[id])
+            valid = valid and was_valid
+        return remaining, valid
+    elif isinstance(rule, ChoiceRule):
+        remaining_one, valid_one = is_valid_rec(rules, message, rule.rule_one)
+        if valid_one:
+            return remaining_one, valid_one
+        else:
+            return is_valid_rec(rules, message, rule.rule_two)
+
+
+if __name__ == '__main__':
+    print(count_valids("day_19.txt"))
