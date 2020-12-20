@@ -169,6 +169,11 @@ class TestDay19(unittest.TestCase):
         tile = Tile.from_lines(5, example_tile_lines)
         self.assertEqual(tile.count_sea_monsters(), 2)
 
+    def test_get_water_roughness(self):
+        example_tile_lines = read_text_list('day_20_sea_monsters_grid.txt')
+        tile = Tile.from_lines(5, example_tile_lines)
+        self.assertEqual(tile.get_water_roughness(), 273)
+
     def assert_equal_any_order(self, list_a, list_b):
         self.assertEqual(sorted(list_a), sorted(list_b))
 
