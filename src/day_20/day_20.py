@@ -1,4 +1,5 @@
 import math
+import random
 import re
 from typing import List, Callable, Set
 
@@ -12,16 +13,26 @@ class Tile(object):
     sorted_points: List[Point] = []
     matched_edges: Set[str] = set()
 
-    def __init__(self, id: int, grid: Grid):
+    def __init__(self, id: int, grid: Grid, matched_edges: Set[str]):
         self.id = id
         self.grid = grid
         self.width = int(math.sqrt(len(grid)))
         self.sorted_points = sorted(grid.keys())
+        self.matched_edges = matched_edges
 
     @classmethod
     def from_lines(cls, id: int, grid_lines: List[str]):
         grid = parse_coordinate_grid(grid_lines)
-        return cls(id, grid)
+        return cls(id, grid, set())
+
+    def do_random_transform(self) -> 'Tile':
+        result = random.randint(0, 2)
+        if result == 0:
+            return self.rotate_right()
+        elif result == 1:
+            return self.flip_vertical()
+        else:
+            return self.flip_horizontal()
 
     def rotate_right(self) -> 'Tile':
         return self.transform(lambda point: (self.width - 1 - point[1], point[0]))
@@ -38,7 +49,7 @@ class Tile(object):
             new_point: Point = point_transformer(point)
             new_points[new_point] = value
 
-        return Tile(self.id, new_points)
+        return Tile(self.id, new_points, self.matched_edges)
 
     def top_edge(self) -> str:
         return ''.join([self.grid[point] for point in self.sorted_points if point[1] == 0])
@@ -56,7 +67,7 @@ class Tile(object):
         return {self.top_edge(), self.bottom_edge(), self.left_edge(), self.right_edge()}
 
     def update_matched_edges(self, matched_edges: Set[str]):
-        self.matched_edges = matched_edges.intersection(self.get_edges())
+        self.matched_edges = matched_edges
 
     def get_all_possible_edges(self) -> Set[str]:
         current_edges = self.get_edges()
@@ -75,6 +86,9 @@ class Puzzle(object):
 
     def add_tile(self, point: Point, tile: Tile):
         self.grid[point] = tile
+
+    def get_tile(self, point: Point):
+        return self.grid[point]
 
 
 def parse_tile(tile_lines: List[str]) -> Tile:
@@ -107,8 +121,44 @@ def classify_tiles(tiles: List[Tile]) -> tuple[List[Tile], List[Tile], List[Tile
     return corners, edges, inners
 
 
-# def make_full_puzzle(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> Puzzle:
+def make_full_puzzle(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> Puzzle:
+    puzzle_dimensions = compute_puzzle_dimensions(corners, edges, inners)
 
+    puzzle = build_top_row(corners, edges, puzzle_dimensions)
+    return puzzle
+
+
+def build_top_row(corners: List[Tile], edges: List[Tile], puzzle_dimensions: int) -> Puzzle:
+    top_left_corner = corners.pop()
+    top_left_corner = rotate_and_flip_until_condition(top_left_corner,
+                                                      lambda tile: tile.right_edge() in tile.matched_edges
+                                                                   and tile.bottom_edge() in tile.matched_edges)
+
+    print('Top left rotated correctly')
+    puzzle: Puzzle = Puzzle()
+    puzzle.add_tile((0, 0), top_left_corner)
+
+    for i in range(1, puzzle_dimensions - 1):
+        previous_piece = puzzle.get_tile((i-1, 0))
+        desired_edge = previous_piece.right_edge()
+        next_piece = next(filter(lambda edge: desired_edge in edge.matched_edges, edges))
+        edges.remove(next_piece)
+        next_piece = rotate_and_flip_until_condition(next_piece, lambda tile: tile.left_edge() == desired_edge)
+        puzzle.add_tile((i, 0), next_piece)
+        print('Done a top edge piece.')
+        print(len(edges))
+
+    return puzzle
+
+
+def compute_puzzle_dimensions(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> int:
+    return int(math.sqrt(len(corners) + len(edges) + len(inners)))
+
+
+def rotate_and_flip_until_condition(tile: Tile, condition: Callable[[Tile], bool]) -> Tile:
+    while not condition(tile):
+        tile = tile.do_random_transform()
+    return tile
 
 
 if __name__ == '__main__':
@@ -117,3 +167,4 @@ if __name__ == '__main__':
     print(len(tiles))
     corners, edges, inners = classify_tiles(tiles)
     print(math.prod([corner.id for corner in corners]))
+    make_full_puzzle(corners, edges, inners)
