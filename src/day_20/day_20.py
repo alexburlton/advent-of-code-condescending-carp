@@ -3,7 +3,11 @@ import random
 import re
 from typing import List, Callable, Set
 
-from utils import Grid, parse_coordinate_grid, Point, read_text_groups
+from utils import Grid, parse_coordinate_grid, Point, read_text_groups, add_points, count_where
+
+sea_monster_points = [(18, 0),
+                    (0, 1), (5, 1), (6, 1), (11, 1), (12, 1), (17, 1), (18, 1), (19, 1),
+                    (1, 2), (4, 2), (7, 2), (10, 2), (13, 2), (16, 2)]
 
 
 class Tile(object):
@@ -74,21 +78,68 @@ class Tile(object):
         flipped_edges = {edge[::-1] for edge in current_edges}
         return current_edges.union(flipped_edges)
 
+    def strip_border(self) -> 'Tile':
+        new_points = Grid()
+        for point, value in self.grid.items():
+            if not self.is_edge_point(point):
+                new_points[(point[0] - 1, point[1] - 1)] = value
+
+        return Tile(self.id, new_points, self.matched_edges)
+
+    def is_edge_point(self, point: Point) -> bool:
+        return point[0] == 0 or point[0] == self.width - 1 or point[1] == 0 or point[1] == self.width - 1
+
+    def get_water_roughness(self) -> int:
+        hash_count: int = count_where(lambda key: self.grid[key] == '#', self.grid.keys())
+        return hash_count - (self.count_sea_monsters() * len(sea_monster_points))
+
+    def count_sea_monsters(self) -> int:
+        return count_where(self.has_sea_monster, self.grid.keys())
+
+    def has_sea_monster(self, point: Point) -> bool:
+        transformed_points = [add_points(point, monster_point) for monster_point in sea_monster_points]
+        matches = [self.grid.get(transformed_point, None) == '#' for transformed_point in transformed_points]
+        return all(matches)
+
+    def get_rows(self) -> List[str]:
+        all_rows: List[str] = []
+        for y in range(0, self.width):
+            row: str = ''
+            for x in range(0, self.width):
+                row = row + self.grid[(x, y)]
+            all_rows.append(row)
+        return all_rows
+
 
 PuzzleGrid = dict[Point, Tile]
 
 
 class Puzzle(object):
     grid: PuzzleGrid
+    dimension: int
 
-    def __init__(self):
+    def __init__(self, dimension: int):
         self.grid = PuzzleGrid()
+        self.dimension = dimension
 
     def add_tile(self, point: Point, tile: Tile):
         self.grid[point] = tile
 
     def get_tile(self, point: Point):
         return self.grid[point]
+
+    def to_tile(self):
+        tile_grid: Grid = Grid()
+        for puzzle_point, tile in self.grid.items():
+            stripped = tile.strip_border()
+            scaled_point = (puzzle_point[0] * stripped.width, puzzle_point[1] * stripped.width)
+            for child_point, value in stripped.grid.items():
+                actual_point = add_points(scaled_point, child_point)
+                tile_grid[actual_point] = value
+
+        return Tile(-1, tile_grid, set())
+
+
 
 
 def parse_tile(tile_lines: List[str]) -> Tile:
@@ -144,23 +195,19 @@ def add_middle_row(puzzle: Puzzle, edges: List[Tile], inners: List[Tile], puzzle
         desired_edge = previous_piece.right_edge()
         next_piece = remove_and_rotate_piece(inners, desired_edge, lambda inner: inner.left_edge())
         puzzle.add_tile((i, row), next_piece)
-        print('Done an inner piece.')
-        print(len(inners))
 
     previous_piece = puzzle.get_tile((puzzle_dimensions - 2, row))
     desired_edge = previous_piece.right_edge()
     top_right_corner = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.left_edge())
-    puzzle.add_tile((puzzle_dimensions - 1, 0), top_right_corner)
+    puzzle.add_tile((puzzle_dimensions - 1, row), top_right_corner)
 
 
 def build_top_row(corners: List[Tile], edges: List[Tile], puzzle_dimensions: int) -> Puzzle:
-    top_left_corner = corners.pop()
+    top_left_corner = corners.pop(0)
     top_left_corner = rotate_and_flip_until_condition(top_left_corner,
                                                       lambda tile: tile.right_edge() in tile.matched_edges
                                                                    and tile.bottom_edge() in tile.matched_edges)
-
-    print('Top left rotated correctly')
-    puzzle: Puzzle = Puzzle()
+    puzzle: Puzzle = Puzzle(puzzle_dimensions)
     puzzle.add_tile((0, 0), top_left_corner)
 
     for i in range(1, puzzle_dimensions - 1):
@@ -168,15 +215,11 @@ def build_top_row(corners: List[Tile], edges: List[Tile], puzzle_dimensions: int
         desired_edge = previous_piece.right_edge()
         next_piece = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.left_edge())
         puzzle.add_tile((i, 0), next_piece)
-        print('Done a top edge piece.')
-        print(len(edges))
 
     previous_piece = puzzle.get_tile((puzzle_dimensions - 2, 0))
     desired_edge = previous_piece.right_edge()
     top_right_corner = remove_and_rotate_piece(corners, desired_edge, lambda corner: corner.left_edge())
     puzzle.add_tile((puzzle_dimensions - 1, 0), top_right_corner)
-
-    print('Done top right corner')
 
     return puzzle
 
@@ -185,12 +228,6 @@ def remove_and_rotate_piece(pieces: List[Tile], desired_edge: str, edge_fn: Call
     next_piece = next(filter(lambda piece: desired_edge in piece.matched_edges, pieces))
     pieces.remove(next_piece)
     return rotate_and_flip_until_condition(next_piece, lambda tile: edge_fn(tile) == desired_edge)
-
-
-def remove_piece(pieces: List[Tile], conditon: Callable[[Tile], bool]) -> Tile:
-    next_piece = next(filter(conditon, pieces))
-    pieces.remove(next_piece)
-    return next_piece
 
 
 def compute_puzzle_dimensions(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> int:
@@ -209,4 +246,8 @@ if __name__ == '__main__':
     print(len(tiles))
     corners, edges, inners = classify_tiles(tiles)
     print(math.prod([corner.id for corner in corners]))
-    make_full_puzzle(corners, edges, inners)
+    puzzle = make_full_puzzle(corners, edges, inners)
+    final_tile = puzzle.to_tile()
+    final_tile = rotate_and_flip_until_condition(final_tile, lambda tile: tile.count_sea_monsters() > 0)
+    print(final_tile.count_sea_monsters())
+    print(final_tile.get_water_roughness())
