@@ -1,7 +1,7 @@
 import unittest
 
 from src.day_20.day_20 import *
-from utils import read_text_list
+from utils import read_text_list, get_grid_lines
 
 
 class TestDay19(unittest.TestCase):

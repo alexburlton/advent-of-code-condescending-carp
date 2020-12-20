@@ -3,7 +3,7 @@ import random
 import re
 from typing import List, Callable, Set
 
-from utils import Grid, parse_coordinate_grid, Point, read_text_groups, add_points, count_where, get_grid_lines
+from utils import Grid, parse_coordinate_grid, Point, read_text_groups, add_points, count_where
 
 sea_monster_points = [(18, 0),
                       (0, 1), (5, 1), (6, 1), (11, 1), (12, 1), (17, 1), (18, 1), (19, 1),
@@ -117,7 +117,7 @@ class Puzzle(object):
         self.grid[point] = tile
 
     def get_tile(self, point: Point):
-        return self.grid[point]
+        return self.grid.get(point, None)
 
     def to_tile(self):
         tile_grid: Grid = Grid()
@@ -129,8 +129,6 @@ class Puzzle(object):
                 tile_grid[actual_point] = value
 
         return Tile(-1, tile_grid, set())
-
-
 
 
 def parse_tile(tile_lines: List[str]) -> Tile:
@@ -147,7 +145,8 @@ def classify_tiles(tiles: List[Tile]) -> tuple[List[Tile], List[Tile], List[Tile
     for tile in tiles:
         matches: Set[str] = set()
         my_edges = tile.get_all_possible_edges()
-        other_tiles = [other_tile for other_tile in tiles if other_tile.get_all_possible_edges() != tile.get_all_possible_edges()]
+        other_tiles = [other_tile for other_tile in tiles if
+                       other_tile.get_all_possible_edges() != tile.get_all_possible_edges()]
         for other_tile in other_tiles:
             other_edges = other_tile.get_all_possible_edges()
             intersection = other_edges.intersection(my_edges)
@@ -166,53 +165,42 @@ def classify_tiles(tiles: List[Tile]) -> tuple[List[Tile], List[Tile], List[Tile
 def make_full_puzzle(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> Puzzle:
     puzzle_dimensions = compute_puzzle_dimensions(corners, edges, inners)
 
-    puzzle = build_top_row(corners, edges, puzzle_dimensions)
-    for row in range(1, puzzle_dimensions - 1):
-        add_middle_row(puzzle, edges, inners, puzzle_dimensions, row)
+    puzzle = Puzzle(puzzle_dimensions)
+    add_row(puzzle, corners, edges, 0)
 
-    add_middle_row(puzzle, corners, edges, puzzle_dimensions, puzzle_dimensions - 1)
+    for row in range(1, puzzle_dimensions - 1):
+        add_row(puzzle, edges, inners, row)
+
+    add_row(puzzle, corners, edges, puzzle_dimensions - 1)
     return puzzle
 
 
-def add_middle_row(puzzle: Puzzle, edges: List[Tile], inners: List[Tile], puzzle_dimensions: int, row: int):
-    above_edge = puzzle.get_tile((0, row-1))
-    desired_edge = above_edge.bottom_edge()
+def add_row(puzzle: Puzzle, edges: List[Tile], inners: List[Tile], row: int):
+    above_edge = puzzle.get_tile((0, row - 1))
 
-    left_edge = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.top_edge())
+    if above_edge is None:
+        # We're building the very first row. So just pick an arbitrary corner piece, and rotate so
+        # the joinable edges are right and bottom
+        left_edge = edges.pop(0)
+        left_edge = rotate_and_flip_until_condition(left_edge, left_corner_condition)
+    else:
+        # Find the first piece of the row, by joining bottom -> top edge from row above
+        desired_edge = above_edge.bottom_edge()
+        left_edge = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.top_edge())
+
     puzzle.add_tile((0, row), left_edge)
 
-    for i in range(1, puzzle_dimensions - 1):
+    # Add the rest of the row, by joining right -> left edge
+    for i in range(1, puzzle.dimension):
         previous_piece = puzzle.get_tile((i - 1, row))
         desired_edge = previous_piece.right_edge()
-        next_piece = remove_and_rotate_piece(inners, desired_edge, lambda inner: inner.left_edge())
+        pile_to_take_from = edges if i == puzzle.dimension - 1 else inners
+        next_piece = remove_and_rotate_piece(pile_to_take_from, desired_edge, lambda inner: inner.left_edge())
         puzzle.add_tile((i, row), next_piece)
 
-    previous_piece = puzzle.get_tile((puzzle_dimensions - 2, row))
-    desired_edge = previous_piece.right_edge()
-    top_right_corner = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.left_edge())
-    puzzle.add_tile((puzzle_dimensions - 1, row), top_right_corner)
 
-
-def build_top_row(corners: List[Tile], edges: List[Tile], puzzle_dimensions: int) -> Puzzle:
-    top_left_corner = corners.pop(0)
-    top_left_corner = rotate_and_flip_until_condition(top_left_corner,
-                                                      lambda tile: tile.right_edge() in tile.matched_edges
-                                                                   and tile.bottom_edge() in tile.matched_edges)
-    puzzle: Puzzle = Puzzle(puzzle_dimensions)
-    puzzle.add_tile((0, 0), top_left_corner)
-
-    for i in range(1, puzzle_dimensions - 1):
-        previous_piece = puzzle.get_tile((i-1, 0))
-        desired_edge = previous_piece.right_edge()
-        next_piece = remove_and_rotate_piece(edges, desired_edge, lambda edge: edge.left_edge())
-        puzzle.add_tile((i, 0), next_piece)
-
-    previous_piece = puzzle.get_tile((puzzle_dimensions - 2, 0))
-    desired_edge = previous_piece.right_edge()
-    top_right_corner = remove_and_rotate_piece(corners, desired_edge, lambda corner: corner.left_edge())
-    puzzle.add_tile((puzzle_dimensions - 1, 0), top_right_corner)
-
-    return puzzle
+def left_corner_condition(tile: Tile):
+    return tile.right_edge() in tile.matched_edges and tile.bottom_edge() in tile.matched_edges
 
 
 def remove_and_rotate_piece(pieces: List[Tile], desired_edge: str, edge_fn: Callable[[Tile], str]) -> Tile:
