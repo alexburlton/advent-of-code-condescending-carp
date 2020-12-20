@@ -90,15 +90,23 @@ class TestDay19(unittest.TestCase):
         tile.update_matched_edges({'abc', 'cba'})
         self.assertEqual(tile.matched_edges, {'abc', 'cba'})
 
-    def test_get_rows(self):
-        tile: Tile = Tile.from_lines(3, ['abc', 'def', 'ghi'])
-        self.assertEqual(tile.get_rows(), ['abc', 'def', 'ghi'])
-
     def test_strip_border(self):
         tile: Tile = Tile.from_lines(3, ['abcd', 'efgh', 'ijkl', 'mnop'])
         stripped = tile.strip_border()
         self.assertEqual(stripped.grid, {(0, 0): 'f', (1, 0): 'g',
                                          (0, 1): 'j', (1, 1): 'k'})
+
+    def test_is_edge_point(self):
+        tile: Tile = Tile.from_lines(3, ['abc', 'def', 'ghi'])
+        self.assertTrue(tile.is_edge_point((0, 0)))
+        self.assertTrue(tile.is_edge_point((1, 0)))
+        self.assertTrue(tile.is_edge_point((2, 0)))
+        self.assertTrue(tile.is_edge_point((0, 1)))
+        self.assertFalse(tile.is_edge_point((1, 1)))
+        self.assertTrue(tile.is_edge_point((2, 1)))
+        self.assertTrue(tile.is_edge_point((0, 2)))
+        self.assertTrue(tile.is_edge_point((1, 2)))
+        self.assertTrue(tile.is_edge_point((2, 2)))
 
     def test_puzzle_to_tile(self):
         tile_one = Tile.from_lines(1, ['0000', '0ab0', '0cd0', '0000'])
@@ -140,9 +148,8 @@ class TestDay19(unittest.TestCase):
         puzzle.add_tile((2, 2), tile_nine)
 
         resulting_tile = puzzle.to_tile()
-        print(resulting_tile.grid)
         self.assertEqual(resulting_tile.width, 6)
-        resulting_rows = resulting_tile.get_rows()
+        resulting_rows = get_grid_lines(resulting_tile.grid)
         self.assertEqual(resulting_rows, ['112233', '112233', '445566', '445566', '778899', '778899'])
 
     def test_count_sea_monsters(self):

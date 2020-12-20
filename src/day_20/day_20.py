@@ -3,11 +3,11 @@ import random
 import re
 from typing import List, Callable, Set
 
-from utils import Grid, parse_coordinate_grid, Point, read_text_groups, add_points, count_where
+from utils import Grid, parse_coordinate_grid, Point, read_text_groups, add_points, count_where, get_grid_lines
 
 sea_monster_points = [(18, 0),
-                    (0, 1), (5, 1), (6, 1), (11, 1), (12, 1), (17, 1), (18, 1), (19, 1),
-                    (1, 2), (4, 2), (7, 2), (10, 2), (13, 2), (16, 2)]
+                      (0, 1), (5, 1), (6, 1), (11, 1), (12, 1), (17, 1), (18, 1), (19, 1),
+                      (1, 2), (4, 2), (7, 2), (10, 2), (13, 2), (16, 2)]
 
 
 class Tile(object):
@@ -100,15 +100,6 @@ class Tile(object):
         transformed_points = [add_points(point, monster_point) for monster_point in sea_monster_points]
         matches = [self.grid.get(transformed_point, None) == '#' for transformed_point in transformed_points]
         return all(matches)
-
-    def get_rows(self) -> List[str]:
-        all_rows: List[str] = []
-        for y in range(0, self.width):
-            row: str = ''
-            for x in range(0, self.width):
-                row = row + self.grid[(x, y)]
-            all_rows.append(row)
-        return all_rows
 
 
 PuzzleGrid = dict[Point, Tile]
@@ -243,11 +234,9 @@ def rotate_and_flip_until_condition(tile: Tile, condition: Callable[[Tile], bool
 if __name__ == '__main__':
     tile_groups = read_text_groups('day_20.txt')
     tiles: List[Tile] = [parse_tile(group.splitlines()) for group in tile_groups]
-    print(len(tiles))
     corners, edges, inners = classify_tiles(tiles)
     print(math.prod([corner.id for corner in corners]))
     puzzle = make_full_puzzle(corners, edges, inners)
     final_tile = puzzle.to_tile()
     final_tile = rotate_and_flip_until_condition(final_tile, lambda tile: tile.count_sea_monsters() > 0)
-    print(final_tile.count_sea_monsters())
     print(final_tile.get_water_roughness())
