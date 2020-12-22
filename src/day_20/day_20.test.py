@@ -85,6 +85,9 @@ class TestDay19(unittest.TestCase):
         self.assert_equal_any_order([edge.id for edge in edges], [2311, 2729, 2473, 1489])
         self.assert_equal_any_order([inner.id for inner in inners], [1427])
 
+    def test_part_a(self):
+        self.assertEqual(part_a('day_20_example.txt'), 20899048083289)
+
     def test_update_matched_edges(self):
         tile: Tile = Tile.from_lines(3, ['abc', 'def', 'ghi'])
         tile.update_matched_edges({'abc', 'cba'})
@@ -173,6 +176,9 @@ class TestDay19(unittest.TestCase):
         example_tile_lines = read_text_list('day_20_sea_monsters_grid.txt')
         tile = Tile.from_lines(5, example_tile_lines)
         self.assertEqual(tile.get_water_roughness(), 273)
+
+    def test_part_b(self):
+        self.assertEqual(part_b('day_20_example.txt'), 273)
 
     def assert_equal_any_order(self, list_a, list_b):
         self.assertEqual(sorted(list_a), sorted(list_b))

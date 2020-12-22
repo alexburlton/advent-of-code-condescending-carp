@@ -71,7 +71,7 @@ class Tile(object):
         return {self.top_edge(), self.bottom_edge(), self.left_edge(), self.right_edge()}
 
     def update_matched_edges(self, matched_edges: Set[str]):
-        self.matched_edges = matched_edges
+        self.matched_edges = self.matched_edges.union(matched_edges)
 
     def get_all_possible_edges(self) -> Set[str]:
         current_edges = self.get_edges()
@@ -142,24 +142,30 @@ def classify_tiles(tiles: List[Tile]) -> tuple[List[Tile], List[Tile], List[Tile
     corners: List[Tile] = []
     edges: List[Tile] = []
     inners: List[Tile] = []
+    remaining_tiles: List[Tile] = tiles.copy()
+
     for tile in tiles:
-        matches: Set[str] = set()
-        my_edges = tile.get_all_possible_edges()
-        other_tiles = [other_tile for other_tile in tiles if
-                       other_tile.get_all_possible_edges() != tile.get_all_possible_edges()]
-        for other_tile in other_tiles:
-            other_edges = other_tile.get_all_possible_edges()
-            intersection = other_edges.intersection(my_edges)
-            matches = matches.union(intersection)
-        tile.update_matched_edges(matches)
-        if len(matches) == 4:
+        remaining_tiles.remove(tile)
+        update_matching_edges(tile, remaining_tiles)
+
+        if len(tile.matched_edges) == 4:
             corners.append(tile)
-        elif len(matches) == 6:
+        elif len(tile.matched_edges) == 6:
             edges.append(tile)
         else:
             inners.append(tile)
 
     return corners, edges, inners
+
+
+def update_matching_edges(tile: Tile, other_tiles: List[Tile]):
+    my_edges = tile.get_all_possible_edges()
+
+    for other_tile in other_tiles:
+        other_edges = other_tile.get_all_possible_edges()
+        intersection = other_edges.intersection(my_edges)
+        tile.update_matched_edges(intersection)
+        other_tile.update_matched_edges(intersection)
 
 
 def make_full_puzzle(corners: List[Tile], edges: List[Tile], inners: List[Tile]) -> Puzzle:
@@ -219,12 +225,25 @@ def rotate_and_flip_until_condition(tile: Tile, condition: Callable[[Tile], bool
     return tile
 
 
-if __name__ == '__main__':
-    tile_groups = read_text_groups('day_20.txt')
+def get_classified_tiles(file_name: str) -> tuple[List[Tile], List[Tile], List[Tile]]:
+    tile_groups = read_text_groups(file_name)
     tiles: List[Tile] = [parse_tile(group.splitlines()) for group in tile_groups]
-    corners, edges, inners = classify_tiles(tiles)
-    print(math.prod([corner.id for corner in corners]))
+    return classify_tiles(tiles)
+
+
+def part_a(file_name: str) -> int:
+    corners, _, _ = get_classified_tiles(file_name)
+    return math.prod([corner.id for corner in corners])
+
+
+def part_b(file_name: str) -> int:
+    corners, edges, inners = get_classified_tiles(file_name)
     puzzle = make_full_puzzle(corners, edges, inners)
     final_tile = puzzle.to_tile()
     final_tile = rotate_and_flip_until_condition(final_tile, lambda tile: tile.count_sea_monsters() > 0)
-    print(final_tile.get_water_roughness())
+    return final_tile.get_water_roughness()
+
+
+if __name__ == '__main__':
+    print(part_a('day_20.txt'))
+    print(part_b('day_20.txt'))
