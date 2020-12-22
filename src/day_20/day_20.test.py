@@ -91,7 +91,8 @@ class TestDay19(unittest.TestCase):
     def test_update_matched_edges(self):
         tile: Tile = Tile.from_lines(3, ['abc', 'def', 'ghi'])
         tile.update_matched_edges({'abc', 'cba'})
-        self.assertEqual(tile.matched_edges, {'abc', 'cba'})
+        tile.update_matched_edges({'def'})
+        self.assertEqual(tile.matched_edges, {'abc', 'cba', 'def'})
 
     def test_strip_border(self):
         tile: Tile = Tile.from_lines(3, ['abcd', 'efgh', 'ijkl', 'mnop'])
