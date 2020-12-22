@@ -3,13 +3,13 @@ import unittest
 from src.day_17.day_17 import *
 
 
-class TestDay16(unittest.TestCase):
+class TestDay17(unittest.TestCase):
     def test_add_points(self):
         self.assertEqual(Point3D(0, 1, 5) + Point3D(-2, 2, 3), Point3D(-2, 3, 8))
 
     def test_neighbours(self):
         pt: Point3D = Point3D(1, 1, 1)
-        neighbours: List[Point3D] = pt.neighbours()
+        neighbours: Set[Point3D] = pt.neighbours()
         self.assertEqual(len(neighbours), 26)
         self.assertTrue(Point3D(0, 0, 0) in neighbours)
         self.assertFalse(Point3D(1, 1, 1) in neighbours)
@@ -37,7 +37,7 @@ class TestDay16(unittest.TestCase):
 
     def test_neighbours_4d(self):
         pt: Point4D = Point4D(1, 1, 1, 1)
-        neighbours: List[Point4D] = pt.neighbours()
+        neighbours: Set[Point4D] = pt.neighbours()
         self.assertEqual(len(neighbours), 80)
         self.assertTrue(Point4D(0, 0, 0, 0) in neighbours)
         self.assertFalse(Point4D(1, 1, 1, 1) in neighbours)

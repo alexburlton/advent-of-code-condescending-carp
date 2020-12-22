@@ -54,6 +54,23 @@ def parse_coordinate_grid(rows: List[str]) -> Grid:
     return grid
 
 
+def get_grid_lines(grid: Grid) -> List[str]:
+    points = grid.keys()
+    x_values = [point[0] for point in points]
+    y_values = [point[1] for point in points]
+
+    x_range = range(min(x_values), max(x_values) + 1)
+    y_range = range(min(y_values), max(y_values) + 1)
+
+    all_rows: List[str] = []
+    for y in y_range:
+        row: str = ''
+        for x in x_range:
+            row = row + grid[(x, y)]
+        all_rows.append(row)
+    return all_rows
+
+
 def windowed(iterable, size):
     iters = tee(iterable, size)
     for i in range(1, size):
