@@ -40,6 +40,7 @@ class TestDay18(unittest.TestCase):
         self.assertEqual(resolve_simple_expression_b('1 + 2 * 3 + 4 * 5 + 6'), 231)
         self.assertEqual(resolve_simple_expression_b('1 + 6 + 44'), 51)
         self.assertEqual(resolve_simple_expression_b('11664 + 2 + 4 * 2'), 23340)
+        self.assertEqual(resolve_simple_expression_b('6 + 7 * 16 + 7'), 299)
 
     def test_resolve_complex_expression_b(self):
         self.assertEqual(resolve_complex_expression_b('1 + (2 * 3) + (4 * (5 + 6))'), 51)

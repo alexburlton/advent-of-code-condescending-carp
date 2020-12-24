@@ -19,7 +19,7 @@ def resolve_addition(expression: str) -> str:
     if result is None:
         return expression
     matched = result.group(1)
-    return expression.replace(matched, str(resolve_simple_expression(matched)))
+    return expression.replace(matched, str(resolve_simple_expression(matched)), 1)
 
 
 def resolve_simple_expression_b(expression: str) -> int:
